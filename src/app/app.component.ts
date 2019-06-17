@@ -27,20 +27,44 @@ export class AppComponent implements OnInit {
         try {
             // let originalExpresion = this.rawExpression;
             this.tree.root = this.buildTree(this.rawExpression);
+            console.log(this.tree);
             // this.rawExpression = originalExpresion;
         } catch(e) {
+            console.log(e);
             alert('Existe un error en la expresión ingresada');
         }
     }
 
     buildTree(data: string): Node {
+        console.log(data);
+        debugger;
         let node = new Node();
 
         if(data.charAt(0) == '!') {
             node.originalSign = false;
-            data = data.substring(2, data.length - 1);
+            data = data.substring(1);
+
+            if(data.charAt(0) == '(' && data.charAt(data.length - 1) == ')') {
+                data = data.substring(1, data.length - 1);
+            } else  if(data.length == 1) {
+                // If it's only one symbol.
+                node.isAtom = true;
+                node.data = data.charAt(0);
+
+                return node;
+            }
         } else {
             node.originalSign = true;
+            if(data.charAt(0) == '(') {
+                data = data.substring(1, data.length - 1);
+            }
+            else if(data.length == 1) {
+                // If it's only one symbol.
+                node.isAtom = true;
+                node.data = data.charAt(0);
+
+                return node;
+            }
         }
 
         let leftData = '';
@@ -66,10 +90,13 @@ export class AppComponent implements OnInit {
             leftData = data.charAt(0);
             operatorIdx = 1;
         }
+        rightData = data.substring(operatorIdx + 2);
+        // console.log(data, leftData, rightData);
+        // debugger;
 
         node.operator = data.substring(operatorIdx, operatorIdx + 2);
-        debugger;
         node.leftChild = this.buildTree(leftData);
+        node.rightChild = this.buildTree(rightData);
         return node;
     }
 }
@@ -87,6 +114,10 @@ export class Node {
     public originalSign: boolean;
     public sign: boolean;
     public data: string;
+
+    constructor() {
+        this.isAtom = false;
+    }
 }
 
 export class Tree {
