@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 
-declare var lscache: any;
+// declare var lscache: any;
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -9,89 +10,90 @@ declare var lscache: any;
 
 export class AppComponent implements OnInit {
     title = 'sistema-experto';
-    public rules: Rule[] = [];
-    public atoms: Set<string> = new Set([]);
+
+    tree: Tree;
     public rawExpression: string = '';
     @ViewChild('rawInput') rawInput: ElementRef;
 
     ngOnInit() {
-        let atoms = lscache.get('atoms');
-        if(atoms != null) {
-            atoms.forEach(a => {
-                this.atoms.add(a);
-            });
-        }
+        this.tree = new Tree();
+    }
 
-        let rules = lscache.get('rules');
-        if(rules != null) {
-            rules.forEach(r => {
-                this.rules.push(this.mapRule(r));
-            });
-        }
-
+    putTest() {
+        this.rawExpression = `!((P->(Q->R))->((P\\/S)->((!(Q->R)/\\!S)/\\R)))`;
     }
 
     parseInput() {
         try {
-            let data        = this.rawExpression.split('->');
-            let ruleName: string    = data[1];
-            let atomsData: any      = data[0];
-            let ruleSign: boolean = true;
-            let atomsArray: Atom[] = [];
-
-            if(ruleName.includes('!')) {
-                ruleSign = false;
-                ruleName = ruleName.substring(1);
-            }
-            atomsData = atomsData.split('&');
-            atomsData.forEach((a: string) => {
-                let atomSign: boolean = true
-                if(a.includes('!')) {
-                    atomSign = false;
-                    a = a.substring(1);
-                }
-                atomsArray.push(new Atom(a, atomSign));
-                this.atoms.add(a);
-            });
-
-            this.atoms.add(ruleName);
-            this.rules.push(new Rule(ruleName, atomsArray, ruleSign));
-            // console.log(this.rules);
-
-
-            lscache.set('atoms', this.mapValues(this.atoms));
-            lscache.set('rules', this.rules);
-            this.rawExpression = '';
-            alert('Regla ingresada con éxito');
+            // let originalExpresion = this.rawExpression;
+            this.tree.root = this.buildTree(this.rawExpression);
+            // this.rawExpression = originalExpresion;
         } catch(e) {
             alert('Existe un error en la expresión ingresada');
         }
     }
 
-    mapValues(atoms: Set<string>) {
-        let response = [];
-        atoms.forEach(a => response.push(a));
-        return response;
+    buildTree(data: string): Node {
+        let node = new Node();
+
+        if(data.charAt(0) == '!') {
+            node.originalSign = false;
+            data = data.substring(2, data.length - 1);
+        } else {
+            node.originalSign = true;
+        }
+
+        let leftData = '';
+        let rightData = '';
+
+        let operatorIdx: number = null;
+
+        if(data.charAt(0) == '(') {
+            let openParentheses = 1;
+            for(let i = 1; i < data.length; i++) {
+                if(data.charAt(i) == '(')
+                openParentheses++;
+                else if(data.charAt(i) == ')')
+                openParentheses--;
+
+                if(openParentheses == 0) {
+                    leftData = data.substring(1, i);
+                    operatorIdx = i + 1;
+                    break;
+                }
+            }
+        } else {
+            leftData = data.charAt(0);
+            operatorIdx = 1;
+        }
+
+        node.operator = data.substring(operatorIdx, operatorIdx + 2);
+        debugger;
+        node.leftChild = this.buildTree(leftData);
+        return node;
     }
+}
 
-    mapRule(r: any) {
-        let atomsData: Atom[] = [];
-        r.data.forEach((a: Atom) => {
-            atomsData.push(new Atom(a.name, a.sign));
-        });
+export class Node {
+    public leftChild: Node;
+    public rightChild: Node;
 
-        return new Rule(r.name, atomsData, r.sign);
-    }
+    public isAtom: boolean;
+    public originalOperatorSign: boolean;
+    public operatorSign: boolean;
+    public operator: string;
 
-    showRule(r: Rule) {
-        alert(r.serialize());
-    }
+    public id: number;
+    public originalSign: boolean;
+    public sign: boolean;
+    public data: string;
+}
 
-    append(atomText: string) {
-        this.rawExpression += atomText;
-        setTimeout(()=>{ // this will make the execution after the above boolean has changed
-            this.rawInput.nativeElement.focus();
-        },0);
+export class Tree {
+    public root: Node;
+
+    constructor() {
+        this.root = null;
     }
 }
 

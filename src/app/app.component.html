@@ -10,23 +10,8 @@
                         <input #rawInput type="text" class="form-control"  name="raw_expression" [(ngModel)]="rawExpression" />
                     </div>
                     <div class="col-md-4">
-                        <button type="button" name="button" class="btn btn-primary" (click)="parseInput()">Agregar regla</button>
-                    </div>
-                </div>
-                <div class="info">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p>Átomos</p>
-                            <select class="form-control" name="atoms" multiple>
-                                <option [value]="a" *ngFor="let a of atoms; let i = index;" (dblclick)="append(a)">{{ a }}</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <p>Reglas</p>
-                            <select class="form-control" name="rules" multiple>
-                                <option [value]="r.id" *ngFor="let r of rules; let i = index;" (dblclick)="showRule(r)">R{{ i + 1 }}</option>
-                            </select>
-                        </div>
+                        <button type="button" name="button" class="btn btn-primary" (click)="parseInput()">Analizar</button>
+                        <button type="button" name="button" class="btn btn-warning" (click)="putTest()">Probar</button>
                     </div>
                 </div>
             </form>
