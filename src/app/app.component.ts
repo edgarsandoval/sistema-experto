@@ -43,28 +43,16 @@ export class AppComponent implements OnInit {
         if(data.charAt(0) == '!') {
             node.originalSign = false;
             data = data.substring(1);
+        }
 
-            if(data.charAt(0) == '(' && data.charAt(data.length - 1) == ')') {
-                data = data.substring(1, data.length - 1);
-            } else  if(data.length == 1) {
-                // If it's only one symbol.
-                node.isAtom = true;
-                node.data = data.charAt(0);
+        if(data.charAt(0) == '(' && data.charAt(data.length - 1) == ')') {
+            data = data.substring(1, data.length - 1);
+        } else  if(data.length == 1) {
+            // If it's only one symbol.
+            node.isAtom = true;
+            node.data = data.charAt(0);
 
-                return node;
-            }
-        } else {
-            node.originalSign = true;
-            if(data.charAt(0) == '(') {
-                data = data.substring(1, data.length - 1);
-            }
-            else if(data.length == 1) {
-                // If it's only one symbol.
-                node.isAtom = true;
-                node.data = data.charAt(0);
-
-                return node;
-            }
+            return node;
         }
 
         let leftData = '';
@@ -117,6 +105,7 @@ export class Node {
 
     constructor() {
         this.isAtom = false;
+        this.originalSign = true;
     }
 }
 
